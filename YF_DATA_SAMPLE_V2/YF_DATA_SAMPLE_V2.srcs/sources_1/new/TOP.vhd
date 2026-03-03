@@ -105,7 +105,9 @@ entity TOP is
 	ads1110_scl         :out STD_LOGIC;        -- I2C 时钟线 (输出，需外部上拉)
 ----------------------------------------------------    
     at24lc64_sda            :inout std_logic;              ---串行数据输入
-    at24lc64_scl            :inout std_logic                ---串行数据输入
+    at24lc64_scl            :inout std_logic;              ---串行数据输入
+---------------- 规避静电不过的故障 ----------------
+    usb_repeater_supply     :out std_logic
  );
 end TOP;
 
@@ -329,7 +331,8 @@ component usb_pro_deal is
 ----------------------------------
 ---------------------------------
     rst_n_usb         :out std_logic;    
-    rst_n_ad          :out std_logic
+    rst_n_ad          :out std_logic;
+    usb_repeater_supply  :out std_logic
  );
 end component;
 
@@ -623,7 +626,8 @@ ins_usb_pro_deal:usb_pro_deal port map(
     
     
     rst_n_usb              =>   rst_n_usb              ,
-    rst_n_ad               =>   rst_n_ad          
+    rst_n_ad               =>   rst_n_ad               ,
+    usb_repeater_supply    =>   usb_repeater_supply
 );
 
 

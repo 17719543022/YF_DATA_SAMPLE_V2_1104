@@ -105,7 +105,8 @@ entity usb_pro_deal is
 ----------------------------------
 ---------------------------------
     rst_n_usb         :out std_logic;    
-    rst_n_ad          :out std_logic
+    rst_n_ad          :out std_logic;
+    usb_repeater_supply  :out std_logic
  );
 end usb_pro_deal;
 
@@ -180,6 +181,12 @@ signal ad_data_buf_r1: ad_buf_t:=(others=>X"010101");
 signal ad_data_buf_r2: ad_buf_t:=(others=>X"020202");
 signal ad_data_buf_r3: ad_buf_t:=(others=>X"030303");
 
+signal common_sig_i             :std_logic;
+signal usb_repeater_supply_i    :std_logic;
+signal URS_clk_counter:integer range 0 to 65535;
+signal URS_ms_heartbeat_counter:integer range 0 to 4095;
+signal URS_ms_supply_counter:integer range 0 to 4095;
+
 attribute mark_debug:string;
 attribute mark_debug of s_axis_tvalid  :signal is "true";
 attribute mark_debug of s_axis_tdata   :signal is "true";
@@ -196,6 +203,10 @@ attribute mark_debug of lock_data_en     :signal is "true";
 attribute mark_debug of door_bell_cmd    :signal is "true";
 attribute mark_debug of ad_data_buf_vld  :signal is "true";
 
+attribute mark_debug of work_mod         :signal is "true";
+attribute mark_debug of commom_sig       :signal is "true";
+attribute mark_debug of URS_ms_supply_counter       :signal is "true";
+attribute mark_debug of usb_repeater_supply_i       :signal is "true";
 
 COMPONENT ila_0
 
@@ -457,6 +468,7 @@ ad_channel_en0<=ad_channel_en(35 downto 0);
 work_mod      <=work_mod_i;
 m0_num        <=m0_num_t;
 rst_n_usb     <=rst_n;
+usb_repeater_supply     <= usb_repeater_supply_i;
 
 up_data_freq_o<=up_data_freq;
 
@@ -556,27 +568,33 @@ process(clkin,rst_n)
 begin
     if rst_n='0' then
         commom_sig<='0'; 
+        common_sig_i <= '0';
         self_check_sta<='0';
     elsif rising_edge(clkin) then
         if usb_rx_buf_vld='1' and usb_rx_buf_type=X"10" then        ---配置命令 
             if usb_rx_buf(10)=X"00" then
                 commom_sig<='1';      ---阻抗模式
+                common_sig_i <= '1';
                 self_check_sta<='1';
             elsif usb_rx_buf(10)=X"01" then
                 commom_sig<='0';       ---采集模式
+                common_sig_i <= '0';
                 self_check_sta<='0';
             end if;
         elsif usb_rx_buf_vld='1' and usb_rx_buf_type=X"11" then
             if usb_rx_buf(5)=X"00" then
                  commom_sig<='1';      ---阻抗模式
+                 common_sig_i <= '1';
                  self_check_sta<='1';
             elsif usb_rx_buf(5)=X"01" then
                 commom_sig<='0';       ---采集模式
+                common_sig_i <= '0';
                 self_check_sta<='0';
             end if;
         elsif m1_cfg_data_vld='1' then
             self_check_sta<=m1_o_self_check_sta;
             commom_sig    <=m1_o_self_check_sta;
+            common_sig_i  <= m1_o_self_check_sta;
         end if;
     end if;
 end process;
@@ -1222,7 +1240,69 @@ begin
     end if;
 end process;
 
+process(clkin, rst_n)
+begin
+    if rst_n = '0' then
+        URS_clk_counter <= 0;
+    elsif rising_edge(clkin) then
+        if URS_clk_counter = 49999 then
+            URS_clk_counter <= 0;
+        else
+            URS_clk_counter <= URS_clk_counter + 1;
+        end if;
+    end if;
+end process;
 
+process(clkin, rst_n)
+begin
+    if rst_n = '0' then
+        URS_ms_heartbeat_counter <= 0;
+    elsif rising_edge(clkin) then
+        if work_mod_i = X"50" and common_sig_i = '0' then
+            if usb_rx_buf_vld='1' and usb_rx_buf_type=X"30" then
+                URS_ms_heartbeat_counter <= 0;
+            elsif URS_clk_counter = 49999 then
+                if URS_ms_heartbeat_counter < 1000 then
+                    URS_ms_heartbeat_counter <= URS_ms_heartbeat_counter +  1;
+                else
+                    URS_ms_heartbeat_counter <= URS_ms_heartbeat_counter;
+                end if;
+            end if;
+        else
+            URS_ms_heartbeat_counter <= 0;
+        end if;
+    end if;
+end process;
+
+process(clkin)
+begin
+    if rising_edge(clkin) then
+        if URS_clk_counter = 49999 then
+            if URS_ms_heartbeat_counter = 1000 then
+                if URS_ms_supply_counter < 4095 then
+                    URS_ms_supply_counter <= URS_ms_supply_counter + 1;
+                else
+                    URS_ms_supply_counter <= URS_ms_supply_counter;
+                end if;
+            else
+                URS_ms_supply_counter <= 4095;
+            end if;
+        end if;
+    end if;
+end process;
+
+process(clkin, rst_n)
+begin
+    if rst_n = '0' then
+        usb_repeater_supply_i <= '1';
+    elsif rising_edge(clkin) then
+        if URS_ms_supply_counter < 500 then
+            usb_repeater_supply_i <= '0';
+        else
+            usb_repeater_supply_i <= '1';
+        end if;
+    end if;
+end process;
 
 
 

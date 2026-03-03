@@ -143,6 +143,8 @@ set_property PACKAGE_PIN V19 [get_ports at24lc64_scl]
 set_property PACKAGE_PIN U17 [get_ports at24lc64_sda]
 set_property IOSTANDARD LVCMOS33 [get_ports at24lc64_scl]
 set_property IOSTANDARD LVCMOS33 [get_ports at24lc64_sda]
+set_property PACKAGE_PIN F1 [get_ports usb_repeater_supply]
+set_property IOSTANDARD LVCMOS33 [get_ports usb_repeater_supply]
 
 #级联管脚定义
 set_property PACKAGE_PIN B2 [get_ports spi3cfg_clk]
@@ -339,6 +341,22 @@ create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe19]
 set_property port_width 1 [get_debug_ports u_ila_0/probe19]
 connect_debug_port u_ila_0/probe19 [get_nets [list ins_usb_pro_deal/usb_rx_buf_vld]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe20]
+set_property port_width 8 [get_debug_ports u_ila_0/probe20]
+connect_debug_port u_ila_0/probe20 [get_nets [list {ins_usb_pro_deal/work_mod[0]} {ins_usb_pro_deal/work_mod[1]} {ins_usb_pro_deal/work_mod[2]} {ins_usb_pro_deal/work_mod[3]} {ins_usb_pro_deal/work_mod[4]} {ins_usb_pro_deal/work_mod[5]} {ins_usb_pro_deal/work_mod[6]} {ins_usb_pro_deal/work_mod[7]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe21]
+set_property port_width 1 [get_debug_ports u_ila_0/probe21]
+connect_debug_port u_ila_0/probe21 [get_nets [list ins_usb_pro_deal/commom_sig]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe22]
+set_property port_width 12 [get_debug_ports u_ila_0/probe22]
+connect_debug_port u_ila_0/probe22 [get_nets [list {ins_usb_pro_deal/URS_ms_supply_counter[0]} {ins_usb_pro_deal/URS_ms_supply_counter[1]} {ins_usb_pro_deal/URS_ms_supply_counter[2]} {ins_usb_pro_deal/URS_ms_supply_counter[3]} {ins_usb_pro_deal/URS_ms_supply_counter[4]} {ins_usb_pro_deal/URS_ms_supply_counter[5]} {ins_usb_pro_deal/URS_ms_supply_counter[6]} {ins_usb_pro_deal/URS_ms_supply_counter[7]} {ins_usb_pro_deal/URS_ms_supply_counter[8]} {ins_usb_pro_deal/URS_ms_supply_counter[9]} {ins_usb_pro_deal/URS_ms_supply_counter[10]} {ins_usb_pro_deal/URS_ms_supply_counter[11]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe23]
+set_property port_width 1 [get_debug_ports u_ila_0/probe23]
+connect_debug_port u_ila_0/probe23 [get_nets [list ins_usb_pro_deal/usb_repeater_supply_i]]
 
 
 
