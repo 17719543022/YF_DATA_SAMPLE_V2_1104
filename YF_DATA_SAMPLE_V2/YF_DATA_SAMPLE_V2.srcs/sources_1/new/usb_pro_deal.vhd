@@ -1279,10 +1279,10 @@ begin
     if rising_edge(clkin) then
         if URS_clk_counter = 49999 then
             if URS_ms_heartbeat_counter = 1000 then
-                if URS_ms_supply_counter < 4095 then
-                    URS_ms_supply_counter <= URS_ms_supply_counter + 1;
-                else
+                if URS_ms_supply_counter = 1000 then
                     URS_ms_supply_counter <= URS_ms_supply_counter;
+                else
+                    URS_ms_supply_counter <= URS_ms_supply_counter + 1;
                 end if;
             else
                 URS_ms_supply_counter <= 4095;
